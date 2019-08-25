@@ -9,7 +9,7 @@ defmodule EpubCoverExtractor do
   """
 
   @doc """
-  TODO
+  Open the EPUB archive and get the ebook cover
 
   ## Examples
 
@@ -19,44 +19,56 @@ defmodule EpubCoverExtractor do
         72, 68, 82, 0, 0, 5, 130, 0, 0, 8, 202, 8, 6, 0, 0,
         0, 43, 176, 122, 217, 0, 0, 0, 9, 112, 72, 89, 115,
         0, 0, 14, 196, 0, 0, 14, ...>>}
+
+      iex> EpubCoverExtractor.get_cover('donotexist')
+      {:error, :enoent}
   """
   def get_cover(path) do
-    {:ok, handle} = :zip.zip_open(path)
-
-    {:ok, results} =
-      case get_cover_from_manifest(handle) do
-        {:ok, results} -> {:ok, results}
-        {:error, _reason} -> get_cover_by_filename(handle)
+    handle =
+      case :zip.zip_open(path, [:memory]) do
+        {:ok, handle} -> handle
+        err -> err
       end
 
-    Enum.each(['OEBPS', 'META-INF'], &File.rm_rf/1)
+    results =
+      case get_cover_from_manifest(handle) do
+        {:error, _reason} -> get_cover_by_filename(handle)
+        results -> results
+      end
 
+    close_zip(handle)
     results
   end
 
-  def get_cover_from_manifest(handle) do
-    with {:ok, file} <- :zip.zip_get('META-INF/container.xml', handle),
-         root_file <- File.read!(file),
-         {:ok, content_file} <-
-           root_file
+  defp get_cover_from_manifest({:error, _reason} = err), do: err
+
+  defp get_cover_from_manifest(handle) do
+    with {:ok, {_file, xml}} <- :zip.zip_get('META-INF/container.xml', handle),
+         {:ok, {_file, xml}} <-
+           xml
            |> xpath(~x"//rootfile/@full-path")
            |> :zip.zip_get(handle),
          cover_path <-
-           File.read!(content_file)
-           |> xpath(~x"//manifest/item[@id='cover-image']/@href"),
+           xml |> xpath(~x"//manifest/item[@id='cover-image']/@href"),
          full_path <- 'OEBPS/' ++ cover_path do
-      {:ok, get_cover_by_filename(handle, full_path)}
+      get_cover_by_filename(handle, full_path)
     else
-      err -> {:error, err}
+      err -> err
     end
   end
 
-  def get_cover_by_filename(handle, cover_path \\ @cover_path) do
-    :zip.zip_get(cover_path, handle)
+  defp get_cover_by_filename(handle, cover_path \\ @cover_path)
 
-    case File.read(cover_path) do
-      {:ok, content} -> {:ok, content}
-      {:error, reason} -> {:error, reason}
+  defp get_cover_by_filename({:error, _reason} = err, _path), do: err
+
+  defp get_cover_by_filename(handle, cover_path) do
+    case :zip.zip_get(cover_path, handle) do
+      {:ok, {_file, binary}} -> {:ok, binary}
+      err -> err
     end
   end
+
+  defp close_zip({:error, reason}), do: reason
+
+  defp close_zip(handle), do: :zip.zip_close(handle)
 end

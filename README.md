@@ -1,11 +1,11 @@
 # EpubCoverExtractor
 
-**TODO: Add description**
+A tool for get the ebooks covers, the projet is WIP,
+contributions are welcome.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `epub_cover_extractor` to your list of dependencies in `mix.exs`:
+Add `epub_cover_extractor` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do

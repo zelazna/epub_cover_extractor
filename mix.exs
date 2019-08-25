@@ -8,7 +8,8 @@ defmodule EpubCoverExtractor.MixProject do
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: package()
+      package: package(),
+      description: description()
     ]
   end
 
@@ -22,8 +23,13 @@ defmodule EpubCoverExtractor.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:sweet_xml, git: "https://github.com/kbrw/sweet_xml"}
+      {:sweet_xml, git: "https://github.com/kbrw/sweet_xml"},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
     ]
+  end
+
+  defp description() do
+    "A tool for get the ebooks covers"
   end
 
   defp package do

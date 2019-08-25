@@ -23,7 +23,7 @@ defmodule EpubCoverExtractor.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:sweet_xml, git: "https://github.com/kbrw/sweet_xml"},
+      {:sweet_xml, "~> 0.6.6"},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false}
     ]
   end

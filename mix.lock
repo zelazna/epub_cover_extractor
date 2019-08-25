@@ -1,0 +1,5 @@
+%{
+  "hoedown": {:git, "https://github.com/hoedown/hoedown.git", "980b9c549b4348d50b683ecee6abee470b98acda", []},
+  "markdown": {:git, "https://github.com/devinus/markdown.git", "d065dbcc4e242a85ca2516fdadd0082712871fd8", []},
+  "sweet_xml": {:git, "https://github.com/kbrw/sweet_xml", "710469e8c843e7762f7c6bb9940cd62d2b709628", []},
+}

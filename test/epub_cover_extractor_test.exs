@@ -12,4 +12,9 @@ defmodule EpubCoverExtractorTest do
     assert EpubCoverExtractor.get_cover('test/resources/books/book3.epub') ==
              File.read("test/resources/images/cover3.png")
   end
+
+  test "returns the cover with string params" do
+    assert EpubCoverExtractor.get_cover("test/resources/books/book.epub") ==
+             File.read("test/resources/images/cover.png")
+  end
 end

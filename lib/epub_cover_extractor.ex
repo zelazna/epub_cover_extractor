@@ -12,16 +12,22 @@ defmodule EpubCoverExtractor do
   Open the EPUB archive and get the ebook cover
 
   ## Examples
-      EpubCoverExtractor.get_cover('donotexist')
+      EpubCoverExtractor.get_cover("donotexist")
       {:error, :enoent}
 
-      EpubCoverExtractor.get_cover('book.epub')
+      {:ok, binary} = EpubCoverExtractor.get_cover("book.epub")
       {:ok,
       <<137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73,
         72, 68, 82, 0, 0, 5, 130, 0, 0, 8, 202, 8, 6, 0, 0,
         0, 43, 176, 122, 217, 0, 0, 0, 9, 112, 72, 89, 115,
-        0, 0, 14, 196, 0, 0, 14>>}
+        0, 0, 14, 196, 0, 0, 14...>>}
+      File.write("cover.png", binary)
   """
+
+  def get_cover(path) when is_binary(path) do
+    to_charlist(path) |> get_cover
+  end
+
   def get_cover(path) do
     handle =
       case :zip.zip_open(path, [:memory]) do

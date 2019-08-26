@@ -19,4 +19,17 @@ end
 
 ## Documentation
 
-THe project documentation can be found [here](https://hexdocs.pm/epub_cover_extractor/api-reference.html) on Hex
+The project documentation can be found [here](https://hexdocs.pm/epub_cover_extractor/api-reference.html) on Hex
+
+### Quick Start
+
+```elixir
+
+{:ok, binary} = EpubCoverExtractor.get_cover("book.epub")
+{:ok,
+<<137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73,
+  72, 68, 82, 0, 0, 5, 130, 0, 0, 8, 202, 8, 6, 0, 0,
+  0, 43, 176, 122, 217, 0, 0, 0, 9, 112, 72, 89, 115,
+  0, 0, 14, 196, 0, 0, 14...>>}
+File.write("cover.png", binary)
+```

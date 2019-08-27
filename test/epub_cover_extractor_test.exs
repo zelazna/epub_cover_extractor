@@ -11,7 +11,7 @@ defmodule EpubCoverExtractorTest do
   end
 
   test "returns an error if the book doesnt exists" do
-    assert EpubCoverExtractor.get_cover("do_not_exists") == {:error, :enoent}
+    assert EpubCoverExtractor.get_cover("does_not_exists") == {:error, :enoent}
   end
 
   test "returns the cover with a right manifest" do

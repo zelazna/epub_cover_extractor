@@ -12,7 +12,7 @@ defmodule EpubCoverExtractor do
   Open the EPUB archive and get the ebook cover
 
   ## Examples
-      EpubCoverExtractor.get_cover("donotexist")
+      EpubCoverExtractor.get_cover("doesnotexist")
       {:error, :enoent}
 
       {:ok, binary} = EpubCoverExtractor.get_cover("book.epub")

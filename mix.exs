@@ -24,7 +24,8 @@ defmodule EpubCoverExtractor.MixProject do
   defp deps do
     [
       {:sweet_xml, "~> 0.6.6"},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:credo, "~> 1.1.0", only: [:dev, :test], runtime: false}
     ]
   end
 

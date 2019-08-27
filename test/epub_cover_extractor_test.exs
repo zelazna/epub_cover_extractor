@@ -10,8 +10,16 @@ defmodule EpubCoverExtractorTest do
     end
   end
 
-  test "returns an error if the book doesnt exists" do
-    assert EpubCoverExtractor.get_cover("does_not_exists") == {:error, :enoent}
+  test "raise an error if the book doesn't exists" do
+    assert_raise ArgumentError, fn ->
+      EpubCoverExtractor.get_cover("123")
+    end
+  end
+
+  test "raise an error if the book has not the right extension" do
+    assert_raise ArgumentError, fn ->
+      EpubCoverExtractor.get_cover("#{@img_path}cover3.png")
+    end
   end
 
   test "returns the cover with a right manifest" do

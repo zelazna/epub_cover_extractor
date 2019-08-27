@@ -23,57 +23,48 @@ defmodule EpubCoverExtractor do
         0, 0, 14, 196, 0, 0, 14...>>}
       File.write("cover.png", binary)
   """
-
   def get_cover(path) when is_binary(path) do
-    to_charlist(path) |> get_cover
+    Path.expand(path)
+    |> to_charlist()
+    |> open_archive()
+    |> find_cover_file()
+    |> close_archive()
   end
 
-  def get_cover(path) do
-    handle =
-      case :zip.zip_open(path, [:memory]) do
-        {:ok, handle} -> handle
-        err -> err
-      end
+  defp open_archive(path) do
+    :zip.zip_open(path, [:memory])
+  end
 
-    results =
-      case get_cover_from_manifest(handle) do
-        {:error, _reason} -> get_cover_by_filename(handle)
-        results -> results
-      end
+  defp close_archive({:error, _} = err), do: err
 
-    close_zip(handle)
+  defp close_archive({results, handle}) do
+    :zip.zip_close(handle)
     results
   end
 
-  defp get_cover_from_manifest({:error, _reason} = err), do: err
+  defp find_cover_file({:error, _} = err), do: err
 
-  defp get_cover_from_manifest(handle) do
-    with {:ok, {_file, xml}} <- :zip.zip_get('META-INF/container.xml', handle),
-         {:ok, {_file, xml}} <-
-           xml
-           |> xpath(~x"//rootfile/@full-path")
-           |> :zip.zip_get(handle),
-         cover_path <-
-           xml |> xpath(~x"//manifest/item[@id='cover-image']/@href"),
-         full_path <- 'OEBPS/' ++ cover_path do
-      get_cover_by_filename(handle, full_path)
-    else
-      err -> err
-    end
+  defp find_cover_file({:ok, handle}) do
+    {find_cover_from_manifest(handle) |> find_cover_by_filename(), handle}
   end
 
-  defp get_cover_by_filename(handle, cover_path \\ @cover_path)
+  defp find_cover_from_manifest(handle) do
+    {:ok, {_, xml}} = :zip.zip_get('META-INF/container.xml', handle)
 
-  defp get_cover_by_filename({:error, _reason} = err, _path), do: err
+    {:ok, {_, xml}} = xml |> xpath(~x"//rootfile/@full-path") |> :zip.zip_get(handle)
 
-  defp get_cover_by_filename(handle, cover_path) do
+    cover_path = xml |> xpath(~x"//manifest/item[@id='cover-image']/@href")
+    {handle, extract_cover(handle, 'OEBPS/' ++ cover_path)}
+  end
+
+  defp find_cover_by_filename({handle, {:error, _}}), do: extract_cover(handle)
+
+  defp find_cover_by_filename({_, {:ok, _} = result}), do: result
+
+  defp extract_cover(handle, cover_path \\ @cover_path) do
     case :zip.zip_get(cover_path, handle) do
-      {:ok, {_file, binary}} -> {:ok, binary}
+      {:ok, {_, binary}} -> {:ok, binary}
       err -> err
     end
   end
-
-  defp close_zip({:error, reason}), do: reason
-
-  defp close_zip(handle), do: :zip.zip_close(handle)
 end

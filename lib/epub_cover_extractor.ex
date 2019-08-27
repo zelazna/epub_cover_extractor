@@ -23,16 +23,18 @@ defmodule EpubCoverExtractor do
         0, 0, 14, 196, 0, 0, 14...>>}
       File.write("cover.png", binary)
   """
-  def get_cover(path) when is_binary(path) do
-    Path.expand(path)
+  def get_cover(epub) when is_binary(epub) do
+    Path.expand(epub)
+    |> check_file()
+    |> check_extension()
     |> to_charlist()
     |> open_archive()
     |> find_cover_file()
     |> close_archive()
   end
 
-  defp open_archive(path) do
-    :zip.zip_open(path, [:memory])
+  defp open_archive(epub) do
+    :zip.zip_open(epub, [:memory])
   end
 
   defp close_archive({:error, _} = err), do: err
@@ -66,5 +68,21 @@ defmodule EpubCoverExtractor do
       {:ok, {_, binary}} -> {:ok, binary}
       err -> err
     end
+  end
+
+  defp check_file(epub) do
+    unless File.exists?(epub) do
+      raise ArgumentError, "file #{epub} does not exists"
+    end
+
+    epub
+  end
+
+  defp check_extension(epub) do
+    unless epub |> Path.extname() |> String.downcase() == ".epub" do
+      raise ArgumentError, "file #{epub} does not have an '.epub' extension"
+    end
+
+    epub
   end
 end

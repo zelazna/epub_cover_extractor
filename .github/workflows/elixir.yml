@@ -12,5 +12,7 @@ jobs:
         mix local.rebar --force
         mix local.hex --force
         mix deps.get
+    - name: Check Format
+      run: mix format --check-formatted
     - name: Run Tests
       run: mix test

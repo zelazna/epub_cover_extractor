@@ -1,7 +1,7 @@
 defmodule EpubCoverExtractor do
   import SweetXml
 
-  @cover_path 'cover.jpeg'
+  @cover_paths ['cover.jpeg', 'cover.jpg', 'cover.png']
 
   @moduledoc """
   Documentation for EpubCoverExtractor.
@@ -52,18 +52,19 @@ defmodule EpubCoverExtractor do
 
   defp find_cover_from_manifest(handle) do
     {:ok, {_, xml}} = :zip.zip_get('META-INF/container.xml', handle)
-
     {:ok, {_, xml}} = xml |> xpath(~x"//rootfile/@full-path") |> :zip.zip_get(handle)
-
     cover_path = xml |> xpath(~x"//manifest/item[@id='cover-image']/@href")
     {handle, extract_cover(handle, 'OEBPS/' ++ cover_path)}
   end
 
-  defp find_cover_by_filename({handle, {:error, _}}), do: extract_cover(handle)
+  defp find_cover_by_filename({handle, {:error, _}}) do
+    Enum.map(@cover_paths, &extract_cover(handle, &1))
+    |> Enum.find(fn {res, _} -> res == :ok end)
+  end
 
   defp find_cover_by_filename({_, {:ok, _} = result}), do: result
 
-  defp extract_cover(handle, cover_path \\ @cover_path) do
+  defp extract_cover(handle, cover_path) do
     case :zip.zip_get(cover_path, handle) do
       {:ok, {_, binary}} -> {:ok, binary}
       err -> err

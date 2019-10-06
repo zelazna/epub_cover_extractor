@@ -1,8 +1,8 @@
 defmodule EpubCoverExtractorTest do
   use ExUnit.Case
 
-  @book_path "test/resources/books/"
-  @img_path "test/resources/images/"
+  @book_path "test/fixtures/books/"
+  @img_path "test/fixtures/images/"
 
   test "raise an error if the path is not a string" do
     assert_raise FunctionClauseError, fn ->
@@ -18,17 +18,14 @@ defmodule EpubCoverExtractorTest do
 
   test "raise an error if the book has not the right extension" do
     assert_raise ArgumentError, fn ->
-      EpubCoverExtractor.get_cover("#{@img_path}cover3.png")
+      EpubCoverExtractor.get_cover(@img_path <> "cover3.png")
     end
   end
 
-  test "returns the cover with a right manifest" do
-    assert EpubCoverExtractor.get_cover("#{@book_path}book3.epub") ==
-             File.read("#{@img_path}cover3.png")
-  end
+  test "returns all the books covers" do
+    assert_cover = fn path -> assert {:ok, bin} = EpubCoverExtractor.get_cover(path) end
 
-  test "returns the cover with the cover path" do
-    assert EpubCoverExtractor.get_cover("#{@book_path}book.epub") ==
-             File.read("#{@img_path}cover.png")
+    Path.wildcard(@book_path <> "*.epub")
+    |> Enum.each(assert_cover)
   end
 end
